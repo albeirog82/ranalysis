@@ -92,11 +92,34 @@ max_id_column <- function(v_column,v_data) {
 "**********************************************************************************
  ** 7. Histograma que agrupación de los valores para una de las actividades *******
  **********************************************************************************"
+
+hist_graph <- function(field){
+  hist(field) 
+}
+
+"**********************************************************************************
+ ** 8. Histograma que Crear y grafica el promedio y la desv estándar para cada una de las actividades *******
+ **********************************************************************************"
+
+mean_graph <- function(field){
+  df <- tdatos[-c(1)]
+  print(df)
+  print(colMeans(tdatos))
+  print(typeof(colMeans(tdatos)))
+  print(class(colMeans(tdatos)))
+  print(typeof(tdatos))
+  print(class(tdatos))
+  H <- c(7,12,28,3,41, 7, 9, 10, 11)
+  M <- c("tarea1",	"tarea2", "tarea3", "tarea4", "tarea5", "tarea6", "tarea7", "tarea8", "parcial")
+  barplot(colMeans(df),names.arg=M)
+}
+
+
 data=data.frame(value=tdatos[,4:4])
 
-p <- ggplot(data, aes(x=value)) + 
-  geom_histogram()
-p
+# p <- ggplot(data, aes(x=value)) + 
+#   geom_histogram()
+# p
 
 df<-tdatos %>% 
     #Creo una variable explícita ad hoc con los grupos. 
@@ -142,3 +165,6 @@ min_icolumn(tdatos,i_col,f_col)
 max_id_column(x_col,tdatos)
 
 
+hist_graph(tdatos$tarea1)
+
+mean_graph(tdatos$tarea1)
