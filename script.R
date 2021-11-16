@@ -13,13 +13,14 @@
  /*===================LIBRERIAS=====================*/
 /*=================================================*/" 
 library(tidyverse)
-library(ggplot2)
+library(highcharter)
 
 "/*=================================================*/
  /*==============MACROVARIABLES=====================*/
 /*=================================================*/" 
 
 #Ruta del archivo
+#rFile <- './Documents/Maestria/Semestre4/Seguridad/LabR/datos.txt';
 rFile <- 'C:\\Andes\\ingsegpriv\\ranalysis\\datos.txt';
 
 "/*=================================================*/
@@ -94,49 +95,50 @@ max_id_column <- function(v_column,v_data) {
  **********************************************************************************"
 
 hist_graph <- function(field){
-  hist(field) 
+  hc <- hchart(
+    field, 
+    color = "#978D8B", name = "Histograma"
+  )
+  return(hc)
 }
-
-"**********************************************************************************
- ** 8. Histograma que Crear y grafica el promedio y la desv estándar para cada una de las actividades *******
- **********************************************************************************"
-
-mean_graph <- function(field){
-  df <- tdatos[-c(1)]
-  print(df)
-  print(colMeans(tdatos))
-  print(typeof(colMeans(tdatos)))
-  print(class(colMeans(tdatos)))
-  print(typeof(tdatos))
-  print(class(tdatos))
-  H <- c(7,12,28,3,41, 7, 9, 10, 11)
-  M <- c("tarea1",	"tarea2", "tarea3", "tarea4", "tarea5", "tarea6", "tarea7", "tarea8", "parcial")
-  barplot(colMeans(df),names.arg=M)
-}
-
-
-data=data.frame(value=tdatos[,4:4])
-
-# p <- ggplot(data, aes(x=value)) + 
-#   geom_histogram()
-# p
-
-df<-tdatos %>% 
-    #Creo una variable explícita ad hoc con los grupos. 
-    # No es elegante, pero sirve para validar el paso intermedio.
-    mutate(intervalo = case_when(tarea3 > 4.5 ~ "mayor45",
-                                 between(tarea3, 3.8, 4.5) ~ "38-45", 
-                                 tarea3 < 3.8 ~ "menor38")) %>% 
-    #Agrupo por las categorías de intervalo
-    group_by(intervalo) %>% 
-    #Sumo Resultado dentro de cada grupo
-    summarise(n = sum(n))
-
 
 "**********************************************************************************
  ** 8. Promedio y la desviación estándar para las actividades *********************
  **********************************************************************************"
-
+promedio_desviacion_graph <- function(v_data,i_column,f_column) {
+  tdata=v_data[,i_column:f_column]
+  nCol=ncol(tdata)
+  dDatosAcum <- data.frame(column = character(nCol), indcolumn = numeric(nCol),prom= numeric(nCol), stringsAsFactors = FALSE)
+  i=1    
+  for(j in i_column:f_column){
+    dDatosAcum$column[i] <- names(tdatos[j])
+    dDatosAcum$prom[i]  <- as.numeric(format(round(mean(tdatos[,j:j]), 3), nsmall = 2))
+    dDatosAcum$desv[i] <- as.numeric(format(round(sd(tdatos[,j:j]), 2), nsmall = 2))
+    i=i+1
+  }
+  
+  hcg<-highchart() %>%
+       hc_xAxis(type =  "category")%>% 
+       hc_add_series(data = dDatosAcum, 
+                    type = "column",
+                    mapping= hcaes(x=column, y=prom),
+                    color= '#4990E2')%>%
+       hc_add_series(data = dDatosAcum, 
+                    type = "line",
+                    mapping= hcaes(x=column, y=desv),
+                    color= '#FF5733')%>%
+       hc_legend(enabled = FALSE)%>%
+       hc_plotOptions(
+         series = list(
+           boderWidth = 0,
+           dataLabels = list(enabled = TRUE))) %>%
+       hc_tooltip(style=list(color='blue',
+                            fontWeight='bold',
+                            fontSize='18px'),
+                 headerFormat='<span style="font-size: 18px;">{point.key}</span><br/>')
+    
+  return(hcg)  
+}
 
 
 "/*=================================================*/
@@ -144,27 +146,86 @@ df<-tdatos %>%
 /*================================================*/" 
 #Indice de la columna a evaluar
 x_col<-4
-#Indice incial a evaluar
+#Indice incial a evaluar 
 i_col<-2
 #Indice final a evaluar
 f_col<-10
 
-#-------Resultado Función (1)-------#
+#====================================#
+#-------Función valor máximo --------#
+#====================================#
+"Esta función recibe dos parámetros:
+1. La posición o índice de la columna que se quiere evaluar, por ejemplo, 
+   si se quiere evaluar la columna con nombre tarea5 el índice corresponde a 6
+2. Es el nombre de tabla que contiene los datos"
+
 max_column(x_col,tdatos)
 
-#-------Resultado Función (2)-------#
+
+#====================================#
+#-------Función valor mínimo --------#
+#====================================#
+"Esta función recibe dos parámetros:
+1. La posición o índice de la columna que se quiere evaluar, por ejemplo, 
+   si se quiere evaluar la columna con nombre tarea5 el índice corresponde a 6
+2. Es el nombre de tabla que contiene los datos"
+
 min_column(x_col,tdatos)
 
-#-------Resultado Función (3)-------#
+
+#====================================#
+#-----Función valor promedio --------#
+#====================================#
+"Esta función recibe dos parámetros:
+1. La posición o índice de la columna que se quiere evaluar, por ejemplo, 
+   si se quiere evaluar la columna con nombre tarea5 el índice corresponde a 6
+2. Es el nombre de tabla que contiene los datos"
+
 min_prom(x_col,tdatos)
 
-#-------Resultado Función (4)-------#
+#=========================================================#
+#--- Función índice de la columna promedio más alto ------#
+#=========================================================#
+"Esta función recibe tres parámetros:
+ Si por ejemplo las columnas que se quieren evaluar corresponden a Tarea1, Tarea2,Tarea3 y Tarea4, 
+ los parámetros que se reciben son:
+1. Es el nombre de tabla que contiene los datos
+2. Índice de la columna en la mínima posición de izquierda a derecha,siguiendo el ejemplo, Tarea1 es igual a 2
+3. Índice de la columna en la primera posición de derecha a izquierda,siguiendo el ejemplo, Tarea4 es igual a 5
+"
+
 min_icolumn(tdatos,i_col,f_col)
 
-#-------Resultado Función (4)-------#
+#=========================================================#
+#--- Índice de la fila con el valor más alto -------------#
+#=========================================================#
+"Esta función recibe dos parámetros:
+1. La posición o índice de la columna que se quiere evaluar, por ejemplo, 
+   si se quiere evaluar la columna con nombre tarea5 el índice corresponde a 6
+2. Es el nombre de tabla que contiene los datos"
+
 max_id_column(x_col,tdatos)
 
 
+#=========================================================#
+#--------------- Histograma por actividad ----------------#
+#=========================================================#
+"Esta función recibe un parámetro:
+1. Concatenar el nombre de la tabla que contiene los datos y el nombre del campo que se quiere evaluar, 
+   se debe utilizar el símbolo $ para separar: Ejemplo: tdatos$tarea7"
+
 hist_graph(tdatos$tarea1)
 
-mean_graph(tdatos$tarea1)
+
+#=========================================================#
+#------------ Promedio y desviación estándar  ------------#
+#=========================================================#
+"Esta función recibe tres parámetros:
+ Si por ejemplo las columnas que se quieren evaluar corresponden a Tarea1, Tarea2,Tarea3 y Tarea4, 
+ los parámetros que se reciben son:
+1. Es el nombre de tabla que contiene los datos
+2. Índice de la columna en la mínima posición de izquierda a derecha,siguiendo el ejemplo, Tarea1 es igual a 2
+3. Índice de la columna en la primera posición de derecha a izquierda,siguiendo el ejemplo, Tarea4 es igual a 5
+"
+
+promedio_desviacion_graph(tdatos,i_col,f_col)
