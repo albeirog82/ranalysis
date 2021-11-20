@@ -1,0 +1,1 @@
+id	sexo	zip	condicion	parcial1	H	1	corazon		52	H	2	corazon		4.413	M	3	viral    	4.074	M	4	viral    	4.865	H	1	cancer		4.916	H	2	corazon		4.997	M	3	cancer		58	M	4	gripa		4.319	H	1	neumonia	4.9510	H	2	gripa		3.811	M	3	viral		4.58
